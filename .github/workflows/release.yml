@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}
 jobs:
   linux:
     uses: ./.github/workflows/linux.yml
@@ -22,6 +22,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Reject superseded branch candidates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if test "$GITHUB_REF" = refs/heads/main; then
+            test "$(gh api "repos/$GH_REPO/commits/main" --jq '.sha')" = "$GITHUB_SHA"
+          fi
       - id: version
         run: echo "tag=v$(python3 -c 'import json;print(json.load(open("package.json"))["version"])')" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
