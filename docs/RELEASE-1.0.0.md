@@ -1,48 +1,76 @@
 # neisora. 1.0.0
 
-Linux x86_64 and Windows x64 share one source tree. Application code is now
-GPL-3.0-only; third-party notices are retained. English is the primary README;
-[Russian documentation](../README.ru.md) remains available.
+**The first stable release — for Linux and Windows.**
 
-## Included
+Your YouTube Music recommendations, your local collection, and a player you can
+make your own. Thank you to everyone who helped test neisora along the way.
 
-- YouTube Music recommendations, dynamic mixes, search, likes and library.
-- Playlist creation/editing, manual queue edits, repeat/shuffle, local music,
-  paused session restoration, local history and a native sleep timer.
-- Expanded player, optional lyrics, GPU visualizations, themes and wallpaper colors.
-- Manual LRCLIB lyric version preview and selection, saved per track, with a reset
-  to automatic matching and independent timing offsets for selected versions.
-- Native audio output selection. The preferred device persists; disconnecting it
-  temporarily selects the system output and reconnecting restores the preference.
-- Share beside Like in the bottom player. Browsing cards and menus have no Share
-  buttons. Bounded diagnostic export is available in Settings.
-- Linux MPRIS and Windows SMTC adapters; per-user Windows NSIS installer.
-- Branded Windows setup artwork, Segoe UI typography and English/Russian welcome
-  and finish pages; the setup language follows Windows automatically.
+## Make yourself at home
 
-## Checks and limits
+- **Your music, together.** Explore YouTube Music recommendations, supermixes,
+  albums and playlists, or add folders from your own collection.
+- **A player worth opening.** Expand the artwork and lyrics, turn on an
+  audio-reactive GPU visualizer, and choose your colors — including a palette
+  inspired by your wallpaper.
+- **Lyrics that follow along.** Synchronized lines, word highlighting when real
+  timestamps are available, timing adjustments, and a version picker when the
+  automatic match needs a hand.
+- **The everyday essentials.** Likes, playlist editing, drag-to-reorder queues,
+  shuffle, repeat, media keys, listening history and a sleep timer. Restart the
+  app and pick up your saved queue from pause.
+- **Your preferred audio output.** Choose headphones or speakers in Settings.
+  neisora remembers the device and handles disconnecting and reconnecting it.
+- **A fresh Windows welcome.** A per-user installer with neisora artwork and
+  English/Russian setup pages that follow your Windows language.
 
-Source checks include Svelte/TypeScript, Rust unit tests, formatting and Clippy.
-The isolated Linux WebKit suite exercises playback state, radio skip context,
-responsive controls, lyrics, queue/playlist editing, sleep, diagnostics and hostile
-IPC inputs. A private Pulse server checks actual mpv routing, disconnect/reconnect,
-and pause/seek/volume preservation without accessing personal audio devices.
-Production native/AppImage checks use real local playback and fresh profiles.
-Windows CI builds and installs NSIS, tests native primitives and exercises the
-installed application through WebView2 with synthetic local music.
+## Pick your download
 
-A GitHub release is published only after the Linux distribution and Windows native
-jobs pass. Automated Windows GUI checks use a null audio backend: hardware audio,
-media keys, Google login and GPU behavior still need checks on users' machines.
-Packages are unsigned; SHA256SUMS checks file integrity, not publisher identity.
-Windows installation requires internet for mpv and possibly WebView2.
+All builds below are **64-bit x86**. You only need the package for your system.
 
-Mini-player and gapless are deferred. Offline playback covers local files; YouTube
-downloads and Pear plugins are not included. The UI is currently Russian.
+| System | Download |
+| :--- | :--- |
+| Linux — run without installing | `neisora_1.0.0_amd64.AppImage` |
+| Debian / Ubuntu | `neisora_1.0.0_amd64.deb` |
+| Fedora / RPM-based distributions | `neisora-1.0.0-1.x86_64.rpm` |
+| Arch / EndeavourOS | `neisora-1.0.0-1-x86_64.pkg.tar.zst` |
+| Linux — portable archive | `neisora-linux-x86_64.tar.gz` |
+| Windows 10 / 11 | `neisora_1.0.0_x64-setup.exe` |
 
-## Sources and history
+For AppImage, allow execution before launching:
 
-1.0.0 starts a new public Git history at the maintainer's request. Earlier history
-was backed up privately before rewriting; earlier MIT grants are not revoked.
-See [source availability](SOURCES.md). The application identifier stays
-`local.kumite.vesper` so existing profiles survive the update.
+```sh
+chmod +x neisora_1.0.0_amd64.AppImage
+./neisora_1.0.0_amd64.AppImage
+```
+
+Linux builds target **Ubuntu 22.04 / glibc 2.35 or newer**. AppImage includes
+its GUI and playback libraries; native packages and the portable archive need
+system dependencies. Windows setup needs **internet access** to fetch verified
+playback components and WebView2 when needed. The packages are currently unsigned;
+Windows may show an unknown-publisher warning. Use `SHA256SUMS` to check downloads.
+
+[Installation guide](https://github.com/kum1te/neisora/blob/v1.0.0/README.md#installation)
+· [Русская документация](https://github.com/kum1te/neisora/blob/v1.0.0/README.ru.md)
+
+## A few things to know
+
+- The application interface is currently **Russian**.
+- Sign in through **Настройки → Аккаунт** for your personal recommendations,
+  library and likes. Add local music folders in Settings.
+- Some tracks only have plain lyrics; word highlighting requires actual word
+  timestamps. It is never generated from guessed timings.
+- neisora is an independent client using unofficial YouTube Music endpoints.
+  Changes on YouTube's side may affect compatibility.
+- Mini-player, gapless playback and macOS support remain future work.
+
+## Open source, from the first note
+
+neisora is released under **GPLv3** (`GPL-3.0-only`). Third-party components keep
+their own licenses and notices. This release includes the exact application source,
+AppImage dependency sources and their inventory; these are for developers and are
+not needed to install the player.
+
+[Source availability](https://github.com/kum1te/neisora/blob/v1.0.0/docs/SOURCES.md)
+· [Report a bug](https://github.com/kum1te/neisora/issues)
+
+Enjoy the music. **neisora.**

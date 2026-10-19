@@ -53,9 +53,27 @@ jobs:
           cp LICENSE release/LICENSE.txt
           python3 - <<'PY'
           import hashlib
+          import json
           from pathlib import Path
+          version=json.loads(Path('package.json').read_text())['version']
+          expected={
+              f'neisora_{version}_amd64.AppImage',
+              f'neisora_{version}_amd64.deb',
+              f'neisora-{version}-1.x86_64.rpm',
+              f'neisora-{version}-1-x86_64.pkg.tar.zst',
+              'neisora-linux-x86_64.tar.gz',
+              f'neisora_{version}_x64-setup.exe',
+              f'neisora-{version}-source.tar.gz',
+              f'neisora-{version}-appimage-sources.tar',
+              'appimage-sources.json',
+              'LICENSE.txt',
+          }
           files=sorted(p for p in Path('release').iterdir() if p.is_file() and p.name!='SHA256SUMS')
+          actual={p.name for p in files}
+          if actual!=expected:
+              raise SystemExit(f'Release inventory mismatch: missing={expected-actual}, extra={actual-expected}')
           for p in files:
+              if p.stat().st_size == 0: raise SystemExit('Empty release asset: '+p.name)
               if p.stat().st_size >= 2_000_000_000: raise SystemExit('Release asset too large: '+p.name)
           Path('release/SHA256SUMS').write_text(''.join(hashlib.file_digest(p.open('rb'),'sha256').hexdigest()+'  '+p.name+'\n' for p in files))
           PY
