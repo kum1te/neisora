@@ -59,9 +59,12 @@ for path in elfs:
             raise SystemExit('Missing build dependency for '+str(path))
     except OSError: continue
 for path in sorted(files):
-    result = subprocess.run(['dpkg-query', '-S', path], capture_output=True, text=True, check=False)
-    for line in result.stdout.splitlines():
-        if ': ' in line: packages.add(line.rsplit(': ', 1)[0])
+    # ldd often reports /lib while dpkg owns /usr/lib on merged-/usr systems.
+    # Query both spellings so dependency licenses and sources are not omitted.
+    for candidate in {path, str(Path(path).resolve())}:
+        result = subprocess.run(['dpkg-query', '-S', candidate], capture_output=True, text=True, check=False)
+        for line in result.stdout.splitlines():
+            if ': ' in line: packages.add(line.rsplit(': ', 1)[0])
 shutil.copytree('/usr/share/common-licenses', notices/'common-licenses')
 for package in packages:
     path = Path('/usr/share/doc')/package.split(':')[0]/'copyright'

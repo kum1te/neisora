@@ -14,7 +14,7 @@ def fields(block):
  result={};key=None
  for line in block.splitlines():
   if line.startswith((' ','\t')) and key:result[key]+='\n'+line.strip()
-  elif ': ' in line:key,value=line.split(': ',1);result[key]=value
+  elif ':' in line:key,value=line.split(':',1);result[key]=value.strip()
  return result
 records=[];seen=set()
 for name,source_version in sorted(packages):
