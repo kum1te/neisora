@@ -37,7 +37,10 @@ for _ in range(100):
 else:raise AssertionError('Native checkpoint was not committed')
 execute('location.reload()')
 wait('return document.querySelector(".now-title")?.textContent==="Restored radio song"')
-assert execute('return document.querySelector(".main-play").getAttribute("aria-label")==="Воспроизвести"&&Math.abs(+document.querySelector(".seek input").value-58.5)<.2')
+# mpv may report pause=false after stop even though it is idle. A late idle
+# event must not turn a restored paused checkpoint into a playing UI.
+assert invoke('plugin:event|emit',{'event':'player-state','payload':{'position':0,'duration':0,'paused':False,'volume':60,'buffering':False,'active':False}})['ok']
+wait('return document.querySelector(".main-play").getAttribute("aria-label")==="Воспроизвести"&&Math.abs(+document.querySelector(".seek input").value-58.5)<.2')
 assert execute('return document.querySelector(".playback .shuffle-button").disabled')
 execute('''window.restoreCalls=[];const native=window.__TAURI_INTERNALS__.invoke;
 window.__VESPER_TEST_INVOKE__=async(cmd,args,...rest)=>{

@@ -622,7 +622,7 @@
         else s = { ...s, position: pendingSeek.target };
       }
       const wasPaused=player.paused;
-      player = restored&&!s.active?{...s,position:player.position,duration:player.duration}:s;
+      player = restored&&!s.active?{...s,position:player.position,duration:player.duration,paused:true}:s;
       if(s.paused&&!wasPaused&&!resolving)saveSession();
     });
     void register<SleepTimerState>('sleep-timer-state',value=>sleepState=value);
