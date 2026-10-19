@@ -1,0 +1,156 @@
+name: Windows port checks
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+concurrency:
+  group: windows-port-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  CARGO_BUILD_JOBS: 2
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUSTUP_TOOLCHAIN: 1.96.0
+  PYTHONUTF8: 1
+jobs:
+  installer-helper-check:
+    runs-on: windows-2022
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Verify media download, actual NSIS installation and checksum refusal
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force src-tauri/resources/runtime | Out-Null
+          python tools/prepare-windows-installer.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $shell32 = Join-Path $env:SystemRoot 'SysWOW64/WindowsPowerShell/v1.0/powershell.exe'
+          & $shell32 -NoProfile -NonInteractive -ExecutionPolicy Bypass -File src-tauri/resources/runtime/install-mpv.ps1
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content src-tauri/resources/runtime/install-mpv.log -ErrorAction SilentlyContinue
+            throw 'Installer media helper failed'
+          }
+          python tools/windows-installer-check.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($name in @('mpv.exe','d3dcompiler_43.dll')) {
+            if (!(Test-Path "src-tauri/resources/runtime/$name" -PathType Leaf)) { throw "Missing $name" }
+          }
+  native-source-checks:
+    needs: installer-helper-check
+    runs-on: windows-2022
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22.23.3
+      - name: Prepare source check environment
+        shell: pwsh
+        run: |
+          npm install --global pnpm@10.13.1
+          pnpm install --frozen-lockfile
+          rustup toolchain install 1.96.0 --profile minimal --component rustfmt,clippy
+          python tools/prepare-runtime.py --platform windows --arch x86_64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/prepare-notices.py --target x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/prepare-vulkan.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $runtimeLog = & python tools/windows-runtime-check.py 2>&1
+          $runtimeExit = $LASTEXITCODE
+          $runtimeLog | ForEach-Object { Write-Host $_ }
+          if ($runtimeExit -ne 0) {
+            $detail = ($runtimeLog | Select-Object -Last 18) -join ' | '
+            Write-Host "::error title=Windows runtime smoke::$detail"
+            exit $runtimeExit
+          }
+          pnpm build
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        id: rust-cache
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: windows-rust-1.96-${{ hashFiles('src-tauri/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            windows-rust-1.96-${{ hashFiles('src-tauri/Cargo.lock') }}-
+            windows-rust-1.96-
+      - name: Check source and native Windows primitives
+        shell: pwsh
+        run: |
+          pnpm check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --experimental-strip-types --test tools/queue.test.ts tools/playback.test.ts tools/session.test.ts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check-release.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo clippy --locked --all-targets --manifest-path src-tauri/Cargo.toml -- -D warnings
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --locked --manifest-path src-tauri/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build and install Windows tester package
+        shell: pwsh
+        run: |
+          python tools/prepare-windows-installer.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm exec tauri build --config src-tauri/tauri.windows.conf.json --bundles nsis
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $appVersion = (Get-Content package.json | ConvertFrom-Json).version
+          $installer = Get-ChildItem "src-tauri/target/release/bundle/nsis/neisora_${appVersion}_x64-setup.exe"
+          if ($installer.Count -ne 1) { throw 'Expected one current NSIS installer' }
+          $destination = Join-Path $env:RUNNER_TEMP 'neisora-install-test'
+          $install = Start-Process -FilePath $installer.FullName -ArgumentList '/S', "/D=$destination" -Wait -PassThru
+          if ($install.ExitCode -ne 0) {
+            Get-Content "$destination/runtime/install-mpv.log" -ErrorAction SilentlyContinue
+            throw "Install failed: $($install.ExitCode)"
+          }
+          if (!(Test-Path "$destination/neisora.exe")) { throw 'Installed executable missing' }
+          if (!(Test-Path "$destination/runtime/mpv.exe")) { throw 'Installed mpv missing' }
+          if (!(Test-Path "$destination/runtime/python/python.exe")) { throw 'Installed Python missing' }
+          & "$destination/runtime/python/python.exe" "$destination/runtime/yt-dlp" --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # mpv is downloaded by the installer from upstream, never bundled.
+          $stage = Join-Path $env:RUNNER_TEMP 'neisora-windows-test'
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item $installer.FullName $stage
+          Copy-Item docs/WINDOWS-TESTING.md "$stage/TESTING.md"
+          Copy-Item LICENSE $stage
+          $digest = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$digest  $($installer.Name)" | Set-Content "$stage/SHA256SUMS" -Encoding ascii
+      - name: Native WebView2 production smoke
+        shell: pwsh
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+          $client = 'Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          $version = @("HKLM:\SOFTWARE\WOW6432Node\$client", "HKLM:\SOFTWARE\$client", "HKCU:\SOFTWARE\WOW6432Node\$client", "HKCU:\SOFTWARE\$client") | ForEach-Object { (Get-ItemProperty -Path $_ -ErrorAction SilentlyContinue).pv } | Where-Object { $_ } | Select-Object -First 1
+          if (-not $version) { throw 'WebView2 runtime not found' }
+          $driver = Join-Path $env:RUNNER_TEMP 'msedgedriver'
+          New-Item -ItemType Directory -Force $driver | Out-Null
+          Invoke-WebRequest "https://msedgedriver.microsoft.com/$version/edgedriver_win64.zip" -OutFile "$driver/driver.zip"
+          Expand-Archive "$driver/driver.zip" -DestinationPath $driver -Force
+          $env:PATH = "$driver;$env:USERPROFILE/.cargo/bin;$env:PATH"
+          cargo install tauri-driver --version 2.1.0 --locked
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:NEISORA_TEST_BINARY = Join-Path $env:RUNNER_TEMP 'neisora-install-test/neisora.exe'
+          python tools/windows-gui-check.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain verified tester installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: neisora-windows-x64-test
+          path: ${{ runner.temp }}/neisora-windows-test/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always() && steps.rust-cache.outcome == 'success' && steps.rust-cache.outputs.cache-hit != 'true'
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}

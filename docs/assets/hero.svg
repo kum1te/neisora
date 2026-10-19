@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="neisora. — Your music, in a new light.">
+  <defs>
+    <radialGradient id="halo"><stop stop-color="#a88bdf" stop-opacity=".22"/><stop offset="1" stop-color="#a88bdf" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ink" x2="1" y2="1"><stop stop-color="#eee0ff"/><stop offset="1" stop-color="#a588d7"/></linearGradient>
+    <linearGradient id="wave"><stop stop-color="#a588d7" stop-opacity="0"/><stop offset=".5" stop-color="#ceb5ff" stop-opacity=".4"/><stop offset="1" stop-color="#a588d7" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="#0e0d13"/>
+  <ellipse cx="640" cy="170" rx="500" ry="260" fill="url(#halo)"/>
+  <g fill="none" stroke="url(#wave)" stroke-width="1.2">
+    <path d="M0 305C180 305 160 220 350 250S550 360 740 285s280-60 540 20"/>
+    <path d="M0 315C180 315 180 230 360 260S560 350 750 295s290-70 530 20"/>
+    <path d="M0 325C200 325 200 250 380 275S570 345 770 310s280-80 510 15"/>
+  </g>
+  <g transform="translate(432 66) scale(.26)">
+    <rect x="8" y="8" width="240" height="240" rx="64" fill="#211b2c" stroke="#d5c6ff" stroke-opacity=".1"/>
+    <path d="M60 82h29v15c9-13 20-19 35-19 27 0 43 18 43 48v59h-31v-56c0-18-7-27-20-27-16 0-25 12-25 31v52H60z" fill="url(#ink)"/>
+    <circle cx="194" cy="172" r="14" fill="#d8c4f7"/>
+  </g>
+  <text x="518" y="114" fill="#b8a3d5" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="14" letter-spacing="4">DESKTOP MUSIC CLIENT</text>
+  <text x="640" y="222" text-anchor="middle" fill="#f4f0fa" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="94" font-weight="650" letter-spacing="-6">neisora<tspan fill="#cdb4fa">.</tspan></text>
+  <text x="640" y="270" text-anchor="middle" fill="#a99fb6" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" letter-spacing="1">Your music, in a new light.</text>
+  <rect x=".5" y=".5" width="1279" height="399" rx="24" fill="none" stroke="#d5c6ff" stroke-opacity=".09"/>
+</svg>

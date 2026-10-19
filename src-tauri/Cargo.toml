@@ -1,0 +1,53 @@
+[package]
+name = "neisora"
+version = "1.0.0"
+description = "Independent YouTube Music desktop client"
+license = "GPL-3.0-only"
+repository = "https://github.com/kum1te/neisora"
+edition = "2021"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+tauri = { version = "=2.12.4", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "socks"] }
+dirs = "5"
+sha1 = "0.10"
+regex = "1"
+dom_query = "=0.28.0"
+lofty = "=0.25.4"
+notify = "=8.2.0"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+cookie = "0.18"
+serde-saphyr = "2.0"
+base64 = "0.22"
+flate2 = "1"
+libc = "0.2"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "=0.18.2"
+webkit2gtk = { version = "2.0.2", features = ["v2_40"] }
+dbus = "=0.9.12"
+dbus-crossroads = "=0.5.3"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_System_JobObjects", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading", "Win32_System_Pipes", "Win32_System_DataExchange", "Win32_System_Memory", "Win32_System_Ole", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+rfd = { version = "=0.17.2", default-features = false }
+windows = { version = "=0.62.2", features = ["Foundation", "Media", "Storage_Streams", "Win32_System_WinRT", "Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[patch.crates-io]
+glib = { path = "vendor/glib" }

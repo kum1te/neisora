@@ -1,0 +1,76 @@
+name: Release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  linux:
+    uses: ./.github/workflows/linux.yml
+  windows:
+    uses: ./.github/workflows/windows.yml
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.event.head_commit.message, '[release]')
+    needs: [linux, windows]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - id: version
+        run: echo "tag=v$(python3 -c 'import json;print(json.load(open("package.json"))["version"])')" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: linux-packages
+          path: release
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: neisora-windows-x64-test
+          path: windows-package
+      - name: Assemble exact source and verified binaries
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          python3 tools/check-release.py
+          version=$(python3 -c 'import json;print(json.load(open("package.json"))["version"])')
+          test "$RELEASE_TAG" = "v$version"
+          cp "windows-package/neisora_${version}_x64-setup.exe" release/
+          git archive --format=tar.gz --prefix="neisora-$version/" HEAD > "release/neisora-$version-source.tar.gz"
+          cp LICENSE release/LICENSE.txt
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          files=sorted(p for p in Path('release').iterdir() if p.is_file() and p.name!='SHA256SUMS')
+          for p in files:
+              if p.stat().st_size >= 2_000_000_000: raise SystemExit('Release asset too large: '+p.name)
+          Path('release/SHA256SUMS').write_text(''.join(hashlib.file_digest(p.open('rb'),'sha256').hexdigest()+'  '+p.name+'\n' for p in files))
+          PY
+      - name: Publish checked Linux and Windows release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if existing=$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null); then
+            test "$existing" = "$GITHUB_SHA"
+          else
+            gh api --method POST "repos/$GH_REPO/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$GITHUB_SHA" >/dev/null
+          fi
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then echo 'Preserving existing release'; exit 0; fi
+          gh release create "$RELEASE_TAG" --verify-tag --title "neisora. $RELEASE_TAG · Linux & Windows" --notes-file docs/RELEASE-1.0.0.md release/*
+      - name: Remove superseded releases for the authorized 1.0.0 history reset
+        if: steps.version.outputs.tag == 'v1.0.0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Old refs/history were privately backed up before the maintainer-requested reset.
+          # Restrict deletion to this project's known pre-1.0 release tags.
+          for tag in v0.5.0 v0.6.0 v0.6.1 v0.6.2 v0.6.3; do
+            if gh release view "$tag" >/dev/null 2>&1; then gh release delete "$tag" --yes --cleanup-tag; fi
+          done

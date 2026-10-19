@@ -1,0 +1,6 @@
+neisora
+Copyright (c) 2026 kum1te and neisora contributors
+
+Own application code is licensed under GNU GPL version 3 only (GPL-3.0-only).
+See LICENSE. Third-party components retain their own licenses and notices;
+see src-tauri/vendor and the licenses directory in binary distributions.

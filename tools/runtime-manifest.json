@@ -1,0 +1,41 @@
+{
+  "node": {
+    "version": "22.23.3",
+    "sha256": {
+      "x86_64": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de",
+      "aarch64": "a44aeb94849a299b22df10b9e622ec2f605c2183501bc40590705131de7c740f"
+    },
+    "windows_x64_sha256": "2b0ff57b049cda1bbcea2240eec20467018713c1efe1f7360c2681859b90ed71"
+  },
+  "yt-dlp": {
+    "version": "2026.08.19",
+    "sha256": "1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6"
+  },
+  "python-windows": {
+    "version": "3.13.16",
+    "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297"
+  },
+  "mpv-windows": {
+    "release": "20261018",
+    "commit": "01e2533f31",
+    "filename": "mpv-x86_64-20261018-git-01e2533f31.7z",
+    "sha256": "d7157567a2fd88e46f739d2e8b8e6c02d2ad812db04547b45c59a2800821991f",
+    "url": "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261018/mpv-x86_64-20261018-git-01e2533f31.7z"
+  },
+  "vulkan-windows": {
+    "version": "1.4.363.0",
+    "loader": {
+      "commit": "fa218055ff4948b159f31d43f800c808a13d51df",
+      "sha256": "ddab25cb4f206384b232674105144c828391dfad38be5e4f4442c449a7ce0bf4"
+    },
+    "headers": {
+      "commit": "6802bb4733b63ed5efd3adb308a6c885ef180ea1",
+      "sha256": "3760505ffbd3589de77e1b9f5ba11eaac13d3c86869588e19f3df3e0fac7e69c"
+    }
+  },
+  "sevenzip-windows": {
+    "version": "26.04",
+    "url": "https://github.com/ip7z/7zip/releases/download/26.04/7zr.exe",
+    "sha256": "256feca8e274e5da655e2a284fabafd9f554365eb164862089dacd4e8276d282"
+  }
+}
