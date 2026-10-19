@@ -87,6 +87,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/check-release.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/cleanup_history_test.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo clippy --locked --all-targets --manifest-path src-tauri/Cargo.toml -- -D warnings

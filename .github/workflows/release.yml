@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
       - name: Reject superseded branch candidates
@@ -73,14 +74,10 @@ jobs:
           notes="docs/RELEASE-${RELEASE_TAG#v}.md"
           test -f "$notes"
           gh release create "$RELEASE_TAG" --verify-tag --title "neisora. $RELEASE_TAG · Linux & Windows" --notes-file "$notes" release/*
-      - name: Remove superseded releases for the authorized 1.0.0 history reset
+      - name: Remove authorized pre-1.0 releases and old Actions data
         if: steps.version.outputs.tag == 'v1.0.0'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          # Old refs/history were privately backed up before the maintainer-requested reset.
-          # Restrict deletion to this project's known pre-1.0 release tags.
-          for tag in v0.5.0 v0.6.0 v0.6.1 v0.6.2 v0.6.3; do
-            if gh release view "$tag" >/dev/null 2>&1; then gh release delete "$tag" --yes --cleanup-tag; fi
-          done
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: python3 tools/clean-release-history.py --execute

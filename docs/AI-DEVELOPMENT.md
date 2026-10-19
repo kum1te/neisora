@@ -220,7 +220,10 @@ a `main` commit whose message starts with `[release]` requests publication after
 both native Windows checks and the Linux distribution matrix pass. Do not use that
 commit prefix for ordinary work. Existing release tags are immutable; update the
 version files and matching release notes together for a new release. Keep the source archive and AppImage
-corresponding-source inventory with binary assets.
+corresponding-source inventory with binary assets. The one-time 1.0.0 publish job
+also runs the maintainer-authorized old release/Actions cleanup. Do not reuse it
+for unrelated housekeeping; it preserves the current run and requires a published
+1.0.0 release before destructive operations.
 
 ## Handing work to another assistant
 
