@@ -250,7 +250,9 @@ the existing scripts; never commit their downloaded outputs.
 
 The native build must use production `dist`. Copy/install the native binary **before**
 Tauri's AppImage bundler stamps it with the AppImage bundle type. Installing that
-stamped binary as an ordinary desktop build can break resource discovery. Use
+stamped binary as an ordinary desktop build can break resource discovery.
+`tools/linux-release.sh` removes only the root output executable before its cached
+Cargo build to force a fresh native binary; keep that safeguard when changing CI. Use
 `tools/install.sh` and its versioned atomic installation instead of overwriting a
 running binary. Do not force-restart personal playback to activate an update.
 

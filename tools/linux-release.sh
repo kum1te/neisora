@@ -8,7 +8,10 @@ python3 tools/prepare-notices.py
 python3 tools/check-release.py
 pnpm check
 node --experimental-strip-types --test tools/queue.test.ts tools/playback.test.ts tools/session.test.ts
+# Tauri stamps the output binary in place when bundling AppImage. Cargo can
+# otherwise reuse that stamped binary from a previous CI cache for native packages.
 pnpm build
+rm -f "$target_dir/release/neisora"
 cargo build --release --locked --manifest-path src-tauri/Cargo.toml
 # Remove only this tool's older generated packages; never upload mixed versions.
 python3 - <<'CLEAN'
