@@ -145,7 +145,8 @@ jobs:
           name: neisora-windows-x64-test
           path: ${{ runner.temp }}/neisora-windows-test/
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
+          compression-level: 0
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && steps.rust-cache.outcome == 'success' && steps.rust-cache.outputs.cache-hit != 'true'
         with:
