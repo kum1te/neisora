@@ -1,3 +1,7 @@
+!ifdef MUI_INCLUDED
+  !include "${__FILEDIR__}\installer\appearance.nsh"
+!endif
+
 !macro NSIS_HOOK_POSTINSTALL
   DetailPrint "Downloading and verifying the media engine..."
   nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\runtime\install-mpv.ps1"'

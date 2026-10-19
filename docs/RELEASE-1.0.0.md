@@ -17,6 +17,8 @@ GPL-3.0-only; third-party notices are retained. English is the primary README;
 - Share beside Like in the bottom player. Browsing cards and menus have no Share
   buttons. Bounded diagnostic export is available in Settings.
 - Linux MPRIS and Windows SMTC adapters; per-user Windows NSIS installer.
+- Branded Windows setup artwork, Segoe UI typography and English/Russian welcome
+  and finish pages; the setup language follows Windows automatically.
 
 ## Checks and limits
 

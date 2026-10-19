@@ -14,11 +14,15 @@
       "nsis": {
         "installMode": "currentUser",
         "languages": [
-          "Russian",
-          "English"
+          "English",
+          "Russian"
         ],
-        "displayLanguageSelector": true,
-        "installerHooks": "windows-installer.nsh"
+        "displayLanguageSelector": false,
+        "installerHooks": "windows-installer.nsh",
+        "headerImage": "installer/header.bmp",
+        "sidebarImage": "installer/sidebar.bmp",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico"
       }
     }
   }
