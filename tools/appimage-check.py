@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory(prefix='neisora-image-check-') as temporary:
 
 # The output plugin must use our checksum-pinned runtime, not download a floating one.
 runtime_pin=json.loads(Path('tools/appimage-runtime-sources.json').read_text())['commit']
-reported=subprocess.check_output([str(image),'--appimage-version'],text=True)
+reported=subprocess.check_output([str(image),'--appimage-version'],text=True,stderr=subprocess.STDOUT)
 assert runtime_pin[:7] in reported, reported
 
 print('AppImage: pinned runtime, bundled helpers, cookie import module, mpv and license notices PASS')
