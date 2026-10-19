@@ -42,5 +42,8 @@ if directory:
     (root/'AppRun').write_bytes(launcher.read_bytes())
     (root/'AppRun').chmod(0o755)
     print('AppImage: scoped ELF paths; host graphics libraries; no global library override',flush=True)
+runtime = Path(packer).with_name('runtime-x86_64')
+if not runtime.is_file(): raise SystemExit('Pinned AppImage runtime missing')
+os.environ['LDAI_RUNTIME_FILE'] = str(runtime.resolve())
 os.environ['APPIMAGE_EXTRACT_AND_RUN']='1'
 os.execv(packer,[packer,*arguments])

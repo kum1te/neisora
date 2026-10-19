@@ -18,5 +18,9 @@
   "neisora-appimage-packer": {
     "url": "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage",
     "sha256": "49d6a17160675a6bd1781699aae6bdf7692d98552e02a3671d2183d10547842e"
+  },
+  "runtime-x86_64": {
+    "url": "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64",
+    "sha256": "156f4bdbde9c52d01814600013e0a273f0118dc2de98975f3c8c63427ec79074"
   }
 }

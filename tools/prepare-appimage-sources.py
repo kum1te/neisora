@@ -16,7 +16,8 @@ def fields(block):
   if line.startswith((' ','\t')) and key:result[key]+='\n'+line.strip()
   elif ':' in line:key,value=line.split(':',1);result[key]=value.strip()
  return result
-records=[];seen=set()
+runtime=json.loads((root/'tools/appimage-runtime-sources.json').read_text())
+records=list(runtime['sources']);seen={r['file'] for r in records}
 for name,source_version in sorted(packages):
  raw=subprocess.check_output(['apt-cache','showsrc','--only-source',name],text=True)
  matches=[v for block in raw.split('\n\n') if (v:=fields(block)).get('Version')==source_version]

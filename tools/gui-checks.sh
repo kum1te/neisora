@@ -6,7 +6,7 @@ export XDG_CONFIG_HOME="$test_root/config" XDG_DATA_HOME="$test_root/data"
 export VESPER_MPV_AO=null WEBKIT_DISABLE_DMABUF_RENDERER=1
 export VESPER_WEBDRIVER_URL=http://127.0.0.1:4446
 export VESPER_WEBDRIVER_SESSION="$test_root/session.json"
-tauri-driver --port 4446 --native-port 4447 > "$test_root/driver.log" 2>&1 &
+setsid tauri-driver --port 4446 --native-port 4447 > "$test_root/driver.log" 2>&1 &
 driver_pid=$!
 cleanup() {
     python3 - <<'PY' || true
@@ -15,7 +15,11 @@ sys.path.insert(0,'tools')
 from webdriver_client import execute
 execute('window.__TAURI_INTERNALS__.invoke("plugin:window|close",{label:"main"}).catch(()=>{})')
 PY
-    kill "$driver_pid" 2>/dev/null || true
+    python3 - "$driver_pid" <<'PY_STOP'
+import os,signal,sys
+try:os.killpg(int(sys.argv[1]),signal.SIGTERM)
+except ProcessLookupError:pass
+PY_STOP
     wait "$driver_pid" 2>/dev/null || true
 }
 trap cleanup EXIT

@@ -25,7 +25,10 @@ For AppImage, `licenses/appimage/system-components.txt` records the exact Ubuntu
 binary and source package versions. The release's `appimage-sources.json` index
 provides exact source archive locations and SHA-256 hashes, with an accompanying
 `neisora-<version>-appimage-sources.tar` containing those archives. This includes
-mpv and the transitive Ubuntu components staged into the image. Use the Ubuntu
+mpv and the transitive Ubuntu components staged into the image, plus the pinned
+AppImage runtime and its libfuse/squashfuse sources. The runtime is checksum-pinned
+separately from the packaging tool; its notices and source inventory are embedded
+in `licenses/appimage/runtime`. Use the Ubuntu
 source package build instructions and the recorded baseline to rebuild components;
 `tools/prepare-appimage.py` and `tools/prepare-appimage-sources.py` generate the
 runtime/source inventory. Native Linux packages use system mpv and GUI libraries.

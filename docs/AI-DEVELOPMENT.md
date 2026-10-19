@@ -215,8 +215,11 @@ NEISORA_TEST_BINARY="$(pwd)/src-tauri/target/debug/neisora" \
   dbus-run-session -- xvfb-run -a sh tools/audio-output-checks.sh
 ```
 
-The tagged `release.yml` workflow waits for both native Windows checks and the Linux
-distribution matrix before publishing. Keep the source archive and AppImage
+The `release.yml` workflow tests `main` pushes and version tags. A version tag or
+a `main` commit whose message starts with `[release]` requests publication after
+both native Windows checks and the Linux distribution matrix pass. Do not use that
+commit prefix for ordinary work. Existing release tags are immutable; update the
+version files and matching release notes together for a new release. Keep the source archive and AppImage
 corresponding-source inventory with binary assets.
 
 ## Handing work to another assistant

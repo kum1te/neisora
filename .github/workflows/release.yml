@@ -70,7 +70,9 @@ jobs:
             gh api --method POST "repos/$GH_REPO/git/refs" -f "ref=refs/tags/$RELEASE_TAG" -f "sha=$GITHUB_SHA" >/dev/null
           fi
           if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then echo 'Preserving existing release'; exit 0; fi
-          gh release create "$RELEASE_TAG" --verify-tag --title "neisora. $RELEASE_TAG · Linux & Windows" --notes-file docs/RELEASE-1.0.0.md release/*
+          notes="docs/RELEASE-${RELEASE_TAG#v}.md"
+          test -f "$notes"
+          gh release create "$RELEASE_TAG" --verify-tag --title "neisora. $RELEASE_TAG · Linux & Windows" --notes-file "$notes" release/*
       - name: Remove superseded releases for the authorized 1.0.0 history reset
         if: steps.version.outputs.tag == 'v1.0.0'
         env:

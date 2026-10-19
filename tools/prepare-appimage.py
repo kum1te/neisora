@@ -71,6 +71,7 @@ for package in packages:
     if path.exists(): shutil.copy2(path, notices/(package.replace(':', '_')+'-copyright'))
 (notices/'system-components.txt').write_text(subprocess.check_output(
     ['dpkg-query', '-W', '-f=${Package} ${Version} ${source:Package} ${source:Version} ${Homepage}\\n', *sorted(packages)], text=True))
+subprocess.run([sys.executable, str(root/'tools/prepare-appimage-runtime.py'), str(notices/'runtime')], check=True)
 (notices/'SOURCE.txt').write_text(
     'System components are from Ubuntu 22.04 (jammy and jammy-updates/security).\n'
     'Exact binary and corresponding source package versions: system-components.txt.\n'

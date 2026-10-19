@@ -11,6 +11,8 @@ pulseaudio -n --daemonize=no --exit-idle-time=-1 --log-level=error --load="modul
 pulse_pid=$!
 driver_pid=''
 cleanup(){
+    result=$?
+    if test "$result" -ne 0; then tail -n 100 "$test_root/driver.log" "$test_root/pulse.log" >&2 || true; fi
     if test -n "$driver_pid"; then kill -- "-$driver_pid" 2>/dev/null || true; wait "$driver_pid" 2>/dev/null || true; fi
     kill "$pulse_pid" 2>/dev/null || true; wait "$pulse_pid" 2>/dev/null || true
 }

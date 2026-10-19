@@ -30,4 +30,13 @@ with tempfile.TemporaryDirectory(prefix='neisora-image-check-') as temporary:
     subprocess.run([str(root/'usr/bin/mpv'), '--no-config', '--version'], env=env, check=True, stdout=subprocess.DEVNULL)
     assert (root/'usr/lib/neisora/licenses/NEISORA-LICENSE.txt').read_text() == Path('LICENSE').read_text()
     assert (root/'usr/lib/neisora/licenses/appimage/mpv-copyright').is_file()
-print('AppImage: bundled Node, Python stdlib/extensions, yt-dlp, cookie import module, mpv and notices PASS')
+    runtime_notices=root/'usr/lib/neisora/licenses/appimage/runtime'
+    assert 'libfuse' in (runtime_notices/'NOTICES.txt').read_text()
+    assert json.loads((runtime_notices/'SOURCE.json').read_text())['commit']==json.loads(Path('tools/appimage-runtime-sources.json').read_text())['commit']
+
+# The output plugin must use our checksum-pinned runtime, not download a floating one.
+runtime_pin=json.loads(Path('tools/appimage-runtime-sources.json').read_text())['commit']
+reported=subprocess.check_output([str(image),'--appimage-version'],text=True)
+assert runtime_pin[:7] in reported, reported
+
+print('AppImage: pinned runtime, bundled helpers, cookie import module, mpv and license notices PASS')
